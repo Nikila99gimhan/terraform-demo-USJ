@@ -1,4 +1,4 @@
 variable "instance_type" {
-    type    = string
-    value   = "t3.small"
+    type      = string
+    default   = "t3.small"
 }
