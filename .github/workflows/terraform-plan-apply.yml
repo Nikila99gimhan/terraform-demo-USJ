@@ -1,0 +1,28 @@
+name: Terraform Plan / Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action to run"
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+      module:
+        description: "Module to target"
+        required: true
+        type: choice
+        options:
+          - bootstrap
+          - infrastructure
+
+jobs:
+  terraform:
+    uses: ./.github/workflows/_reusable-terraform.yml
+    with:
+      module: ${{ inputs.module }}
+      action: ${{ inputs.action }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}

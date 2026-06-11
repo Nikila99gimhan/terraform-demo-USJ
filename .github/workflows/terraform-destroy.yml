@@ -1,0 +1,21 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        description: "Module to destroy"
+        required: true
+        type: choice
+        options:
+          - infrastructure   # always destroy infrastructure before bootstrap
+          - bootstrap
+
+jobs:
+  terraform:
+    uses: ./.github/workflows/_reusable-terraform.yml
+    with:
+      module: ${{ inputs.module }}
+      action: destroy
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}

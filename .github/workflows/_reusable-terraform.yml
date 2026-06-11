@@ -1,0 +1,65 @@
+# Reusable Terraform workflow — called by plan-apply and destroy workflows
+# Not triggered directly
+
+name: Reusable Terraform
+
+on:
+  workflow_call:
+    inputs:
+      module:
+        description: "Target module: bootstrap or infrastructure"
+        required: true
+        type: string
+      action:
+        description: "Terraform action: plan, apply, or destroy"
+        required: true
+        type: string
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+
+permissions:
+  id-token: write   # required for OIDC token exchange
+  contents: read
+
+jobs:
+  terraform:
+    name: "terraform ${{ inputs.action }} [${{ inputs.module }}]"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: >-
+          ${{ inputs.module == 'bootstrap'
+            && 'terraform-demo/01-bootstrap'
+            || 'terraform-demo/02-infrastructure' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.10"
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        if: inputs.action == 'plan'
+        run: terraform plan
+
+      - name: Terraform Apply
+        if: inputs.action == 'apply'
+        run: terraform apply -auto-approve
+
+      - name: Terraform Destroy
+        if: inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
