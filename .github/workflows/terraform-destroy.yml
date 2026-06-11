@@ -11,6 +11,10 @@ on:
           - infrastructure   # always destroy infrastructure before bootstrap
           - bootstrap
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   terraform:
     uses: ./.github/workflows/_reusable-terraform.yml

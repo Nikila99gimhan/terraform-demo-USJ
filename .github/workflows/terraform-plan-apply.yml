@@ -18,6 +18,10 @@ on:
           - bootstrap
           - infrastructure
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   terraform:
     uses: ./.github/workflows/_reusable-terraform.yml
